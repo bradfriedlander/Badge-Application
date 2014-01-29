@@ -17,6 +17,7 @@ namespace Magenic.BadgeApplication.DataAccess.EF
         public BadgeAward()
         {
             this.QueueItems = new HashSet<QueueItem>();
+            this.QueueEventLogs = new HashSet<QueueEventLog>();
         }
     
         public int BadgeAwardId { get; set; }
@@ -29,9 +30,11 @@ namespace Magenic.BadgeApplication.DataAccess.EF
         public Nullable<int> PaidCompletedById { get; set; }
         public Nullable<bool> Published { get; set; }
     
-        public virtual Badge Badge { get; set; }
         public virtual Employee Employee { get; set; }
         public virtual Employee Employee1 { get; set; }
         public virtual ICollection<QueueItem> QueueItems { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<QueueEventLog> QueueEventLogs { get; set; }
+        public virtual Badge Badge { get; set; }
     }
 }
