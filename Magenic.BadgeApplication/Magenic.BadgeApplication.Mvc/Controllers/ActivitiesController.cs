@@ -37,16 +37,10 @@ namespace Magenic.BadgeApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async virtual Task<ActionResult> SubmitActivityForm()
         {
             var submittedActivity = SubmitActivity.CreateActivitySubmission(AuthenticatedUser.EmployeeId);
-            var activityIndexViewModel = new ActivityIndexViewModel()
-            {
-                SubmittedActivity = submittedActivity,
-            };
-
-            TryUpdateModel(activityIndexViewModel);
+            TryUpdateModel(submittedActivity, "SubmittedActivity");
             if (await SaveObjectAsync(submittedActivity, true))
             {
                 return RedirectToAction(await Mvc.Activities.Actions.Index());
