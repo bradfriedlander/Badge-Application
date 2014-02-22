@@ -1,6 +1,9 @@
-﻿using Csla;
+﻿using System.Threading.Tasks;
+using Autofac;
+using Csla;
 using Csla.Rules;
 using Csla.Rules.CommonRules;
+using Magenic.BadgeApplication.BusinessLogic.Framework;
 using Magenic.BadgeApplication.Common.DTO;
 using Magenic.BadgeApplication.Common.Enums;
 using Magenic.BadgeApplication.Common.Interfaces;
@@ -52,7 +55,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
         public string ImagePath
         {
             get { return GetProperty(ImagePathProperty); }
-            private set { LoadProperty(ImagePathProperty, value); }
+            private set { SetProperty(ImagePathProperty, value); }
         }
 
         public static readonly PropertyInfo<int> AwardValueAmountProperty = RegisterProperty<int>(c => c.AwardValueAmount);
@@ -60,6 +63,13 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
         {
             get { return GetProperty(AwardValueAmountProperty); }
             private set { SetProperty(AwardValueAmountProperty, value); }
+        }
+
+        public static readonly PropertyInfo<DateTime> CreatedProperty = RegisterProperty<DateTime>(c => c.Created);
+        public DateTime Created
+        {
+            get { return GetProperty(CreatedProperty); }
+            private set { SetProperty(CreatedProperty, value); }
         }
 
         public static readonly PropertyInfo<int> ApprovedByIdProperty = RegisterProperty<int>(c => c.ApprovedById);
@@ -74,16 +84,29 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
         public DateTime? ApprovedDate
         {
             get { return GetProperty(ApprovedDateProperty); }
-            private set { LoadProperty(ApprovedDateProperty, value); }
+            private set { SetProperty(ApprovedDateProperty, value); }
         }
 
         public static readonly PropertyInfo<BadgeStatus> BadgeStatusProperty = RegisterProperty<BadgeStatus>(c => c.BadgeStatus);
         public BadgeStatus BadgeStatus
         {
             get { return GetProperty(BadgeStatusProperty); }
-            private set { LoadProperty(BadgeStatusProperty, value); }
+            private set { SetProperty(BadgeStatusProperty, value); }
         }
         #endregion Properties
+
+        #region Factory Methods
+
+        /// <summary>
+        /// Asynchronously returns a list of all activities awaiting approval for a specific manager.
+        /// </summary>
+        /// <returns>A list of activities to approve.</returns>
+        public async static Task<IApproveBadgeItem> GetBadgesToApproveByIdAsync(int badgeId)
+        {
+            return await IoC.Container.Resolve<IObjectFactory<IApproveBadgeItem>>().FetchAsync(badgeId);
+        }
+
+        #endregion Factory Methods
 
         #region Methods
 
@@ -118,11 +141,34 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
         {
             base.AddBusinessRules();
 
+            this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.GetObject, PermissionType.Administrator.ToString()));
             this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.ExecuteMethod, ApproveBadgeMethod, PermissionType.Administrator.ToString()));
             this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.ExecuteMethod, DenyBadgeMethod, PermissionType.Administrator.ToString()));
         }
 
         #endregion Rules
+
+        #region Data Access
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        private async Task DataPortal_Fetch(int badgeId)
+        {
+            var dal = IoC.Container.Resolve<IApproveBadgeCollectionDAL>();
+
+            var result = await dal.GetBadgeToApproveByIdAsync(badgeId);
+            this.Load(result, false);
+        }
+
+        [Transactional(TransactionalTypes.TransactionScope, TransactionIsolationLevel.ReadCommitted)]
+        protected override void DataPortal_Update()
+        {
+            var saveItem = this.Unload();
+            var dal = IoC.Container.Resolve<IApproveBadgeCollectionDAL>();
+            var result = dal.Update(saveItem);
+            this.Load(result, false);
+        }
+
+
 
         internal ApproveBadgeItemDTO Unload()
         {
@@ -136,6 +182,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
                     Tagline = this.Tagline,
                     Type = this.Type,
                     AwardValueAmount = this.AwardValueAmount,
+                    Created = this.Created,
                     ImagePath = this.ImagePath,
                     BadgeStatus = this.BadgeStatus,
                     ApprovedById = this.ApprovedById,
@@ -145,7 +192,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
             }
         }
 
-        internal void Load(ApproveBadgeItemDTO data)
+        internal void Load(ApproveBadgeItemDTO data, bool inCollection)
         {
             using (this.BypassPropertyChecks)
             {
@@ -155,6 +202,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
                 this.Tagline = data.Tagline;
                 this.Type = data.Type;
                 this.AwardValueAmount = data.AwardValueAmount;
+                this.Created = data.Created;
                 this.ImagePath = data.ImagePath;
                 this.BadgeStatus = data.BadgeStatus;
                 this.ApprovedById = data.ApprovedById;
@@ -162,7 +210,12 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
             }
             this.MarkClean();
             this.MarkOld();
-            this.MarkAsChild();
+            if (inCollection)
+            {
+                this.MarkAsChild();
+            }
         }
+
+        #endregion Data Access
     }
 }

@@ -40,6 +40,18 @@
     <CodeAnalysisRuleSet>..\Magenic.BadgeApplication.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QA|AnyCPU'">
+    <OutputPath>bin\QA\</OutputPath>
+    <DefineConstants>CODE_ANALYSIS;TRACE</DefineConstants>
+    <DocumentationFile>bin\Release\Magenic.BadgeApplication.Common.XML</DocumentationFile>
+    <Optimize>true</Optimize>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>..\Magenic.BadgeApplication.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
       <HintPath>..\packages\Autofac.3.2.0\lib\net40\Autofac.dll</HintPath>
@@ -61,11 +73,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Arg.cs" />
+    <Compile Include="Constants\EmployeeConstants.cs" />
     <Compile Include="DTO\AccountInfoEditDTO.cs" />
     <Compile Include="DTO\ActivityEditDTO.cs" />
     <Compile Include="DTO\ActivityItemDTO.cs" />
     <Compile Include="DTO\ApproveActivityItemDTO.cs" />
     <Compile Include="DTO\ApproveBadgeItemDTO.cs" />
+    <Compile Include="DTO\AuthorizeLogOnDTO.cs" />
     <Compile Include="DTO\BadgeActivityEditDTO.cs" />
     <Compile Include="DTO\BadgeAwardDTO.cs" />
     <Compile Include="DTO\BadgeEditDTO.cs" />
@@ -73,6 +87,7 @@
     <Compile Include="DTO\CustomIdentityDTO.cs" />
     <Compile Include="DTO\DTOBase.cs" />
     <Compile Include="DTO\EarnedBadgeItemDTO.cs" />
+    <Compile Include="DTO\ExternalActivitySubmissionDTO.cs" />
     <Compile Include="DTO\PointsReportItemDTO.cs" />
     <Compile Include="DTO\QueueEventLogDTO.cs" />
     <Compile Include="DTO\QueueItemDTO.cs" />
@@ -100,6 +115,7 @@
     <Compile Include="Interfaces\IApproveBadgeCollection.cs" />
     <Compile Include="Interfaces\IApproveBadgeCollectionDAL.cs" />
     <Compile Include="Interfaces\IApproveBadgeItem.cs" />
+    <Compile Include="Interfaces\IAuthorizeLogOn.cs" />
     <Compile Include="Interfaces\IAwardBadgesDAL.cs" />
     <Compile Include="Interfaces\IBadgeActivityEdit.cs" />
     <Compile Include="Interfaces\IBadgeActivityEditCollection.cs" />
@@ -108,6 +124,7 @@
     <Compile Include="Interfaces\IBadgeEditDAL.cs" />
     <Compile Include="Interfaces\IBadgeCollectionDAL.cs" />
     <Compile Include="Interfaces\IBadgeItem.cs" />
+    <Compile Include="Interfaces\ICreateEmployee.cs" />
     <Compile Include="Interfaces\ICustomIdentity.cs" />
     <Compile Include="Interfaces\ICustomIdentityDAL.cs" />
     <Compile Include="Interfaces\ICustomPrincipal.cs" />

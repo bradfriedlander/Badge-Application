@@ -79,6 +79,27 @@ namespace Magenic.BadgeApplication.Controllers
             var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.RejectActivity);
             return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
         }
+        [NonAction]
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public virtual System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> ApproveBadgeSubmission()
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ApproveBadgeSubmission);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
+        [NonAction]
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public virtual System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> RejectBadgeSubmission()
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.RejectBadgeSubmission);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
+        [NonAction]
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public virtual System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> DownloadImageTemplate()
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.DownloadImageTemplate);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
 
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public BadgeManagerController Actions { get { return Mvc.BadgeManager; } }
@@ -102,11 +123,15 @@ namespace Magenic.BadgeApplication.Controllers
             public readonly string EditBadge = "EditBadge";
             public readonly string EditBadgePost = "EditBadgePost";
             public readonly string ApproveCommunityBadges = "ApproveCommunityBadges";
+            public readonly string ApproveCommunityBadgesList = "ApproveCommunityBadgesList";
             public readonly string PointsReport = "PointsReport";
             public readonly string ApproveActivities = "ApproveActivities";
             public readonly string ApproveActivitiesList = "ApproveActivitiesList";
             public readonly string ApproveActivity = "ApproveActivity";
             public readonly string RejectActivity = "RejectActivity";
+            public readonly string ApproveBadgeSubmission = "ApproveBadgeSubmission";
+            public readonly string RejectBadgeSubmission = "RejectBadgeSubmission";
+            public readonly string DownloadImageTemplate = "DownloadImageTemplate";
         }
 
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
@@ -119,11 +144,15 @@ namespace Magenic.BadgeApplication.Controllers
             public const string EditBadge = "EditBadge";
             public const string EditBadgePost = "EditBadgePost";
             public const string ApproveCommunityBadges = "ApproveCommunityBadges";
+            public const string ApproveCommunityBadgesList = "ApproveCommunityBadgesList";
             public const string PointsReport = "PointsReport";
             public const string ApproveActivities = "ApproveActivities";
             public const string ApproveActivitiesList = "ApproveActivitiesList";
             public const string ApproveActivity = "ApproveActivity";
             public const string RejectActivity = "RejectActivity";
+            public const string ApproveBadgeSubmission = "ApproveBadgeSubmission";
+            public const string RejectBadgeSubmission = "RejectBadgeSubmission";
+            public const string DownloadImageTemplate = "DownloadImageTemplate";
         }
 
 
@@ -154,6 +183,14 @@ namespace Magenic.BadgeApplication.Controllers
             public readonly string badgeEditViewModel = "badgeEditViewModel";
             public readonly string badgeImage = "badgeImage";
         }
+        static readonly ActionParamsClass_PointsReport s_params_PointsReport = new ActionParamsClass_PointsReport();
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public ActionParamsClass_PointsReport PointsReportParams { get { return s_params_PointsReport; } }
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public class ActionParamsClass_PointsReport
+        {
+            public readonly string formCollection = "formCollection";
+        }
         static readonly ActionParamsClass_ApproveActivity s_params_ApproveActivity = new ActionParamsClass_ApproveActivity();
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public ActionParamsClass_ApproveActivity ApproveActivityParams { get { return s_params_ApproveActivity; } }
@@ -170,6 +207,30 @@ namespace Magenic.BadgeApplication.Controllers
         {
             public readonly string submissionId = "submissionId";
         }
+        static readonly ActionParamsClass_ApproveBadgeSubmission s_params_ApproveBadgeSubmission = new ActionParamsClass_ApproveBadgeSubmission();
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public ActionParamsClass_ApproveBadgeSubmission ApproveBadgeSubmissionParams { get { return s_params_ApproveBadgeSubmission; } }
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public class ActionParamsClass_ApproveBadgeSubmission
+        {
+            public readonly string badgeId = "badgeId";
+        }
+        static readonly ActionParamsClass_RejectBadgeSubmission s_params_RejectBadgeSubmission = new ActionParamsClass_RejectBadgeSubmission();
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public ActionParamsClass_RejectBadgeSubmission RejectBadgeSubmissionParams { get { return s_params_RejectBadgeSubmission; } }
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public class ActionParamsClass_RejectBadgeSubmission
+        {
+            public readonly string badgeId = "badgeId";
+        }
+        static readonly ActionParamsClass_DownloadImageTemplate s_params_DownloadImageTemplate = new ActionParamsClass_DownloadImageTemplate();
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public ActionParamsClass_DownloadImageTemplate DownloadImageTemplateParams { get { return s_params_DownloadImageTemplate; } }
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public class ActionParamsClass_DownloadImageTemplate
+        {
+            public readonly string imageTemplatePath = "imageTemplatePath";
+        }
         static readonly ViewsClass s_views = new ViewsClass();
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public ViewsClass Views { get { return s_views; } }
@@ -182,6 +243,7 @@ namespace Magenic.BadgeApplication.Controllers
             {
                 public readonly string _ActivitiesForApproval = "_ActivitiesForApproval";
                 public readonly string _AdminBadgeList = "_AdminBadgeList";
+                public readonly string _BadgesForApproval = "_BadgesForApproval";
                 public readonly string AddBadge = "AddBadge";
                 public readonly string ApproveActivities = "ApproveActivities";
                 public readonly string ApproveCommunityBadges = "ApproveCommunityBadges";
@@ -192,6 +254,7 @@ namespace Magenic.BadgeApplication.Controllers
             }
             public readonly string _ActivitiesForApproval = "~/Views/BadgeManager/_ActivitiesForApproval.cshtml";
             public readonly string _AdminBadgeList = "~/Views/BadgeManager/_AdminBadgeList.cshtml";
+            public readonly string _BadgesForApproval = "~/Views/BadgeManager/_BadgesForApproval.cshtml";
             public readonly string AddBadge = "~/Views/BadgeManager/AddBadge.cshtml";
             public readonly string ApproveActivities = "~/Views/BadgeManager/ApproveActivities.cshtml";
             public readonly string ApproveCommunityBadges = "~/Views/BadgeManager/ApproveCommunityBadges.cshtml";
@@ -269,20 +332,39 @@ namespace Magenic.BadgeApplication.Controllers
 
         partial void ApproveCommunityBadgesOverride(T4MVC_System_Web_Mvc_ActionResult callInfo);
 
-        public override System.Web.Mvc.ActionResult ApproveCommunityBadges()
+        public override System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> ApproveCommunityBadges()
         {
             var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ApproveCommunityBadges);
             ApproveCommunityBadgesOverride(callInfo);
-            return callInfo;
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
+
+        partial void ApproveCommunityBadgesListOverride(T4MVC_System_Web_Mvc_ActionResult callInfo);
+
+        public override System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> ApproveCommunityBadgesList()
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ApproveCommunityBadgesList);
+            ApproveCommunityBadgesListOverride(callInfo);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
         }
 
         partial void PointsReportOverride(T4MVC_System_Web_Mvc_ActionResult callInfo);
 
-        public override System.Web.Mvc.ActionResult PointsReport()
+        public override System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> PointsReport()
         {
             var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.PointsReport);
             PointsReportOverride(callInfo);
-            return callInfo;
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
+
+        partial void PointsReportOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, System.Web.Mvc.FormCollection formCollection);
+
+        public override System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> PointsReport(System.Web.Mvc.FormCollection formCollection)
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.PointsReport);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "formCollection", formCollection);
+            PointsReportOverride(callInfo, formCollection);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
         }
 
         partial void ApproveActivitiesOverride(T4MVC_System_Web_Mvc_ActionResult callInfo);
@@ -320,6 +402,36 @@ namespace Magenic.BadgeApplication.Controllers
             var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.RejectActivity);
             ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "submissionId", submissionId);
             RejectActivityOverride(callInfo, submissionId);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
+
+        partial void ApproveBadgeSubmissionOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, int badgeId);
+
+        public override System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> ApproveBadgeSubmission(int badgeId)
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ApproveBadgeSubmission);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "badgeId", badgeId);
+            ApproveBadgeSubmissionOverride(callInfo, badgeId);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
+
+        partial void RejectBadgeSubmissionOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, int badgeId);
+
+        public override System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> RejectBadgeSubmission(int badgeId)
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.RejectBadgeSubmission);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "badgeId", badgeId);
+            RejectBadgeSubmissionOverride(callInfo, badgeId);
+            return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
+        }
+
+        partial void DownloadImageTemplateOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, string imageTemplatePath);
+
+        public override System.Threading.Tasks.Task<System.Web.Mvc.ActionResult> DownloadImageTemplate(string imageTemplatePath)
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.DownloadImageTemplate);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "imageTemplatePath", imageTemplatePath);
+            DownloadImageTemplateOverride(callInfo, imageTemplatePath);
             return System.Threading.Tasks.Task.FromResult(callInfo as ActionResult);
         }
 

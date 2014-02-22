@@ -51,6 +51,7 @@ namespace Magenic.BadgeApplication.DataAccess.EF
                 ApprovedById = badge.BadgeApprovedById ?? 0,
                 ApprovedDate = badge.BadgeApprovedDate,
                 BadgeStatus = (Common.Enums.BadgeStatus)badge.BadgeStatusId,
+                CreateEmployeeId = badge.CreateEmployeeId,
                 BadgeActivities = new List<BadgeActivityEditDTO>()
             };
             foreach (var badgeActivity in badge.BadgeActivities)
@@ -67,8 +68,6 @@ namespace Magenic.BadgeApplication.DataAccess.EF
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public BadgeEditDTO Update(BadgeEditDTO data)
         {
-            this.SaveToBlobStorage(data);
-
             using (var ctx = new Entities())
             {
                 ctx.Database.Connection.Open();
@@ -92,12 +91,22 @@ namespace Magenic.BadgeApplication.DataAccess.EF
                 objectState.GetObjectStateEntry(saveBadge).SetModifiedProperty("BadgeApprovedById");
                 objectState.GetObjectStateEntry(saveBadge).SetModifiedProperty("BadgeApprovedDate");
                 objectState.GetObjectStateEntry(saveBadge).SetModifiedProperty("BadgeStatusId");
+                objectState.GetObjectStateEntry(saveBadge).SetModifiedProperty("CreateEmployeeId");
 
                 AttachChildren(ctx, data, saveBadge.BadgeId);
                 ctx.SaveChanges();
+
+                data.Id = saveBadge.BadgeId;
+                this.SaveToBlobStorage(data);
+                saveBadge.BadgePath = data.ImagePath;
+                objectState = ((IObjectContextAdapter)ctx).ObjectContext.ObjectStateManager;
+                objectState.GetObjectStateEntry(saveBadge).SetModifiedProperty("BadgePath");
+                ctx.SaveChanges();
+
                 var badge = GetRefreshedBadgeInfo(ctx, saveBadge.BadgeId);
                 data = LoadReturnData(badge);
             }
+
             return data;
         }
 
@@ -178,7 +187,8 @@ namespace Magenic.BadgeApplication.DataAccess.EF
                 BadgeAwardValueAmount = data.AwardValueAmount,
                 BadgeApprovedById = data.ApprovedById == 0 ? null : (int?)data.ApprovedById,
                 BadgeStatusId = (int)data.BadgeStatus,
-                BadgeApprovedDate = data.ApprovedDate
+                BadgeApprovedDate = data.ApprovedDate,
+                CreateEmployeeId = data.CreateEmployeeId
             };
             return badgeEntity;
         }
@@ -186,8 +196,6 @@ namespace Magenic.BadgeApplication.DataAccess.EF
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public BadgeEditDTO Insert(BadgeEditDTO data)
         {
-            this.SaveToBlobStorage(data);
-
             using (var ctx = new Entities())
             {
                 ctx.Database.Connection.Open();
@@ -198,9 +206,18 @@ namespace Magenic.BadgeApplication.DataAccess.EF
                 AttachChildren(ctx, data, saveBadge.BadgeId);
                 ctx.SaveChanges();
 
+                data.Id = saveBadge.BadgeId;
+                this.SaveToBlobStorage(data);
+                saveBadge.BadgePath = data.ImagePath;
+                var objectState = ((IObjectContextAdapter)ctx).ObjectContext.ObjectStateManager;
+                objectState.GetObjectStateEntry(saveBadge).SetModifiedProperty("BadgePath");
+                ctx.SaveChanges();
+
                 var badge = GetRefreshedBadgeInfo(ctx, saveBadge.BadgeId);
                 data = LoadReturnData(badge);
             }
+
+
             return data;
         }
 

@@ -1,9 +1,20 @@
-﻿using Magenic.BadgeApplication.BusinessLogic.Activity;
+﻿using Csla.Rules;
+using Csla.Web.Mvc;
+using Magenic.BadgeApplication.Attributes;
+using Magenic.BadgeApplication.BusinessLogic.Activity;
 using Magenic.BadgeApplication.BusinessLogic.Badge;
+using Magenic.BadgeApplication.BusinessLogic.PointsReport;
+using Magenic.BadgeApplication.Common;
 using Magenic.BadgeApplication.Common.Enums;
+using Magenic.BadgeApplication.Common.Interfaces;
+using Magenic.BadgeApplication.Exceptions;
 using Magenic.BadgeApplication.Extensions;
 using Magenic.BadgeApplication.Models;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -13,17 +24,17 @@ namespace Magenic.BadgeApplication.Controllers
     /// <summary>
     /// 
     /// </summary>
+    [Authorize]
     public partial class BadgeManagerController
         : BaseController
     {
-        // TODO: figure out how to get this to not be constant. There is a way, but it's ugly.
-        private const string Administrator = "Administrator";
-
         private static void SetActivitiesToAdd(BadgeEditViewModel badgeEditViewModel)
         {
-            var activityIdsToAdd = badgeEditViewModel.SelectedActivityIds
-                .Except(badgeEditViewModel.Badge.BadgeActivities
-                .Select(bae => bae.ActivityId));
+            var activityIdsToAdd = new List<int>();
+            if (badgeEditViewModel.SelectedActivityId.HasValue)
+            {
+                activityIdsToAdd = new List<int>() { badgeEditViewModel.SelectedActivityId.Value };
+            }
 
             foreach (var activityId in activityIdsToAdd)
             {
@@ -37,8 +48,8 @@ namespace Magenic.BadgeApplication.Controllers
         private static void SetActivitiesToRemove(BadgeEditViewModel badgeEditViewModel)
         {
             var activityIdsToRemove = badgeEditViewModel.Badge.BadgeActivities
+                .Where(bae => bae.ActivityId != badgeEditViewModel.SelectedActivityId)
                 .Select(bae => bae.ActivityId)
-                .Except(badgeEditViewModel.SelectedActivityIds)
                 .ToList();
 
             foreach (var activityId in activityIdsToRemove)
@@ -55,6 +66,8 @@ namespace Magenic.BadgeApplication.Controllers
         /// Handles the /Home/Index action.
         /// </summary>
         /// <returns></returns>
+        [HttpGet]
+        [HasPermission(AuthorizationActions.GetObject, typeof(BadgeCollection))]
         public async virtual Task<ActionResult> Index()
         {
             var corporateBadges = await BadgeCollection.GetAllBadgesByTypeAsync(BadgeType.Corporate);
@@ -74,10 +87,17 @@ namespace Magenic.BadgeApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ActivityEditCollection))]
         public async virtual Task<ActionResult> ManageActivities()
         {
-            var allActivities = await ActivityCollection.GetAllActivitiesAsync();
-            return View(allActivities);
+            var allActivities = await ActivityEditCollection.GetAllActivitiesAsync();
+            IActivityEdit firstActivity = new ActivityEdit();
+            if (allActivities.Count() > 0)
+            {
+                firstActivity = allActivities.First();
+            }
+
+            return View(firstActivity);
         }
 
         /// <summary>
@@ -85,12 +105,14 @@ namespace Magenic.BadgeApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [HasPermission(AuthorizationActions.GetObject, typeof(BadgeEdit))]
         public async virtual Task<ActionResult> AddBadge()
         {
             var allActivities = await ActivityCollection.GetAllActivitiesAsync();
             var badgeEdit = BadgeEdit.CreateBadge();
             var badgeEditViewModel = new BadgeEditViewModel(allActivities);
             badgeEditViewModel.Badge = badgeEdit as BadgeEdit;
+            badgeEditViewModel.Badge.Priority = 0;
 
             return View(Mvc.BadgeManager.Views.AddBadge, badgeEditViewModel);
         }
@@ -102,6 +124,7 @@ namespace Magenic.BadgeApplication.Controllers
         /// <param name="badgeImage">The badge image.</param>
         /// <returns></returns>
         [HttpPost]
+        [HasPermission(AuthorizationActions.GetObject, typeof(BadgeEdit))]
         public virtual async Task<ActionResult> AddBadgePost(BadgeEditViewModel badgeEditViewModel, HttpPostedFileBase badgeImage)
         {
             var badgeEdit = BadgeEdit.CreateBadge();
@@ -113,12 +136,19 @@ namespace Magenic.BadgeApplication.Controllers
             }
 
             SetActivitiesToAdd(badgeEditViewModel);
-            if (await SaveObjectAsync(badgeEditViewModel.Badge, be => UpdateModel(be, "Badge"), true))
+            if (await SaveObjectAsync(badgeEditViewModel.Badge, be =>
+            {
+                UpdateModel(be, "Badge");
+                if (be.Priority == 0)
+                {
+                    be.Priority = Int32.MaxValue;
+                }
+            }, true))
             {
                 return RedirectToAction(Mvc.BadgeManager.Index().Result);
             }
 
-            return await EditBadge(badgeEditViewModel.Badge.Id);
+            return await AddBadge();
         }
 
         /// <summary>
@@ -127,6 +157,7 @@ namespace Magenic.BadgeApplication.Controllers
         /// <param name="id">The identifier.</param>
         /// <returns></returns>
         [HttpGet]
+        [HasPermission(AuthorizationActions.GetObject, typeof(BadgeEdit))]
         public virtual async Task<ActionResult> EditBadge(int id)
         {
             var allActivities = await ActivityCollection.GetAllActivitiesAsync();
@@ -145,6 +176,7 @@ namespace Magenic.BadgeApplication.Controllers
         /// <param name="badgeImage">The badge image.</param>
         /// <returns></returns>
         [HttpPost]
+        [HasPermission(AuthorizationActions.GetObject, typeof(BadgeEdit))]
         public virtual async Task<ActionResult> EditBadgePost(int id, BadgeEditViewModel badgeEditViewModel, HttpPostedFileBase badgeImage)
         {
             badgeEditViewModel.Badge = await BadgeEdit.GetBadgeEditByIdAsync(id) as BadgeEdit;
@@ -171,10 +203,27 @@ namespace Magenic.BadgeApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Authorize(Roles = Administrator)]
-        public virtual ActionResult ApproveCommunityBadges()
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveBadgeItem))]
+        public virtual async Task<ActionResult> ApproveCommunityBadges()
         {
-            return View();
+            var approveBadgeCollection = await ApproveBadgeCollection.GetAllBadgesToApproveAsync();
+
+            ApproveCommunityBadgesViewModel model = new ApproveCommunityBadgesViewModel(approveBadgeCollection);
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [NoCache]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveBadgeItem))]
+        public virtual async Task<ActionResult> ApproveCommunityBadgesList()
+        {
+            var approveBadgeCollection = await ApproveBadgeCollection.GetAllBadgesToApproveAsync();
+            return PartialView(Mvc.BadgeManager.Views._BadgesForApproval, approveBadgeCollection);
         }
 
         /// <summary>
@@ -182,9 +231,43 @@ namespace Magenic.BadgeApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public virtual ActionResult PointsReport()
+        [HasPermission(AuthorizationActions.GetObject, typeof(PointsReportCollection))]
+        public async virtual Task<ActionResult> PointsReport()
         {
-            return View();
+            var pointsReportCollection = await PointsReportCollection.GetAllPayoutsToApproveAsync();
+            return View(pointsReportCollection);
+        }
+
+        /// <summary>
+        /// Pointses the report.
+        /// </summary>
+        /// <param name="formCollection">The form collection.</param>
+        /// <returns></returns>
+        [HttpPost]
+        [HasPermission(AuthorizationActions.GetObject, typeof(PointsReportCollection))]
+        public async virtual Task<ActionResult> PointsReport(FormCollection formCollection)
+        {
+            Arg.IsNotNull(() => formCollection);
+
+            var allPayouts = await PointsReportCollection.GetAllPayoutsToApproveAsync();
+            if (formCollection.AllKeys.Any(k => k == "CheckedValues"))
+            {
+                var parts = formCollection["CheckedValues"].Split(',');
+                var values = parts.Select(int.Parse);
+
+                var pointsReports = allPayouts.Where(pri => values.Contains(pri.EmployeeId));
+                foreach (var pointsReport in pointsReports)
+                {
+                    pointsReport.Payout(AuthenticatedUser.EmployeeId, DateTime.UtcNow);
+                }
+
+                if (await SaveObjectAsync(allPayouts, true))
+                {
+                    return RedirectToAction("PointsReport", "BadgeManager");
+                }
+            }
+
+            return View(allPayouts);
         }
 
         /// <summary>
@@ -192,6 +275,7 @@ namespace Magenic.BadgeApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveActivityItem))]
         public async virtual Task<ActionResult> ApproveActivities()
         {
             var activitiesToApprove = await ApproveActivityCollection.GetAllActivitiesToApproveAsync(AuthenticatedUser.EmployeeId);
@@ -204,6 +288,8 @@ namespace Magenic.BadgeApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [NoCache]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveActivityItem))]
         public async virtual Task<ActionResult> ApproveActivitiesList()
         {
             var activitiesToApprove = await ApproveActivityCollection.GetAllActivitiesToApproveAsync(AuthenticatedUser.EmployeeId);
@@ -216,6 +302,8 @@ namespace Magenic.BadgeApplication.Controllers
         /// <param name="submissionId">The submission identifier.</param>
         /// <returns></returns>
         [HttpPost]
+        [HandleModelStateException]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveActivityItem))]
         public async virtual Task<ActionResult> ApproveActivity(int submissionId)
         {
             var activitiesToApprove = await ApproveActivityCollection.GetAllActivitiesToApproveAsync(AuthenticatedUser.EmployeeId);
@@ -226,7 +314,7 @@ namespace Magenic.BadgeApplication.Controllers
                 return Json(new { Success = true });
             }
 
-            return Json(new { Success = false, Message = ModelState.Values.SelectMany(ms => ms.Errors).Select(me => me.ErrorMessage) });
+            throw new ModelStateException(ModelState);
         }
 
         /// <summary>
@@ -235,6 +323,8 @@ namespace Magenic.BadgeApplication.Controllers
         /// <param name="submissionId">The submission identifier.</param>
         /// <returns></returns>
         [HttpPost]
+        [HandleModelStateException]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveActivityItem))]
         public async virtual Task<ActionResult> RejectActivity(int submissionId)
         {
             var activitiesToApprove = await ApproveActivityCollection.GetAllActivitiesToApproveAsync(AuthenticatedUser.EmployeeId);
@@ -246,6 +336,67 @@ namespace Magenic.BadgeApplication.Controllers
             }
 
             return Json(new { Success = false, Message = ModelState.Values.SelectMany(ms => ms.Errors).Select(me => me.ErrorMessage) });
+        }
+
+        /// <summary>
+        /// Approves the badge submission.
+        /// </summary>
+        /// <param name="badgeId">The badge identifier.</param>
+        /// <returns></returns>
+        [HttpPost]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveBadgeItem))]
+        public async virtual Task<ActionResult> ApproveBadgeSubmission(int badgeId)
+        {
+            var badgeToApprove = await ApproveBadgeItem.GetBadgesToApproveByIdAsync(badgeId);
+            badgeToApprove.ApproveBadge(AuthenticatedUser.EmployeeId);
+
+            if (await (SaveObjectAsync(badgeToApprove, true)))
+            {
+                return Json(new { Success = true });
+            }
+            return Json(new { Success = false, Message = ModelState.Values.SelectMany(ms => ms.Errors).Select(me => me.ErrorMessage) });
+        }
+
+        /// <summary>
+        /// Rejects the badge submission.
+        /// </summary>
+        /// <param name="badgeId">The badge identifier.</param>
+        /// <returns></returns>
+        [HttpPost]
+        [HasPermission(AuthorizationActions.GetObject, typeof(ApproveBadgeItem))]
+        public async virtual Task<ActionResult> RejectBadgeSubmission(int badgeId)
+        {
+            var badgeToReject = await ApproveBadgeItem.GetBadgesToApproveByIdAsync(badgeId);
+            badgeToReject.DenyBadge();
+
+            if (await (SaveObjectAsync(badgeToReject, true)))
+            {
+                return Json(new { Success = true });
+            }
+            return Json(new { Success = false, Message = ModelState.Values.SelectMany(ms => ms.Errors).Select(me => me.ErrorMessage) });
+        }
+
+        /// <summary>
+        /// Downloads the image template.
+        /// </summary>
+        /// <param name="imageTemplatePath">The image template URI.</param>
+        /// <returns></returns>
+        [HasPermission(AuthorizationActions.GetObject, typeof(BadgeEdit))]
+        public async virtual Task<ActionResult> DownloadImageTemplate(string imageTemplatePath)
+        {
+            var uri = new Uri(imageTemplatePath, UriKind.Absolute);
+            var contentDisposition = new ContentDisposition()
+            {
+                FileName = uri.Segments.Last(),
+                Inline = false,
+            };
+
+            var webClient = new WebClient();
+            webClient.UseDefaultCredentials = true;
+            var fileData = await webClient.DownloadDataTaskAsync(uri);
+
+            Response.AppendHeader("Content-Disposition", contentDisposition.ToString());
+            return File(fileData, "image/png");
         }
     }
 }

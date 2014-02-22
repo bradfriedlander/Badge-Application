@@ -21,7 +21,7 @@ public static class Mvc
     public static Magenic.BadgeApplication.Controllers.ActivitiesController Activities = new Magenic.BadgeApplication.Controllers.T4MVC_ActivitiesController();
     public static Magenic.BadgeApplication.Controllers.BadgeManagerController BadgeManager = new Magenic.BadgeApplication.Controllers.T4MVC_BadgeManagerController();
     public static Magenic.BadgeApplication.Controllers.BadgesController Badges = new Magenic.BadgeApplication.Controllers.T4MVC_BadgesController();
-    public static Magenic.BadgeApplication.Controllers.HomeController Home = new Magenic.BadgeApplication.Controllers.T4MVC_HomeController();
+    public static Magenic.BadgeApplication.Controllers.ErrorController Error = new Magenic.BadgeApplication.Controllers.T4MVC_ErrorController();
     public static Magenic.BadgeApplication.Controllers.ManageActivitiesController ManageActivities = new Magenic.BadgeApplication.Controllers.T4MVC_ManageActivitiesController();
     public static T4Mvc.SharedController Shared = new T4Mvc.SharedController();
 }
@@ -72,6 +72,7 @@ namespace Links
         public static readonly string activitiesManagement_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/activitiesManagement.min.js") ? Url("activitiesManagement.min.js") : Url("activitiesManagement.js");
         public static readonly string activityPage_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/activityPage.min.js") ? Url("activityPage.min.js") : Url("activityPage.js");
         public static readonly string approveActivities_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/approveActivities.min.js") ? Url("approveActivities.min.js") : Url("approveActivities.js");
+        public static readonly string approveBadges_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/approveBadges.min.js") ? Url("approveBadges.min.js") : Url("approveBadges.js");
         public static readonly string badgeEditorPages_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/badgeEditorPages.min.js") ? Url("badgeEditorPages.min.js") : Url("badgeEditorPages.js");
         public static readonly string badgePage_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/badgePage.min.js") ? Url("badgePage.min.js") : Url("badgePage.js");
         public static readonly string bootstrap_datepicker_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/bootstrap-datepicker.min.js") ? Url("bootstrap-datepicker.min.js") : Url("bootstrap-datepicker.js");
@@ -519,6 +520,7 @@ namespace Links
             public static readonly string header_bg_gif = Url("header-bg.gif");
             public static readonly string header_shadow_png = Url("header-shadow.png");
             public static readonly string magenic_badges_logo_png = Url("magenic-badges-logo.png");
+            public static readonly string unknown_png = Url("unknown.png");
         }
 
         public static readonly string Site_less = Url("Site.less");

@@ -38,6 +38,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QA|AnyCPU'">
+    <OutputPath>bin\QA\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
       <HintPath>..\packages\Autofac.3.1.5\lib\net40\Autofac.dll</HintPath>
@@ -75,8 +84,11 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Spatial, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Spatial.5.6.0\lib\net40\System.Spatial.dll</HintPath>
     </Reference>
@@ -103,6 +115,8 @@
     <Compile Include="ApproveActivityCollectionTests.cs" />
     <Compile Include="ApproveBadgeCollectionTests.cs" />
     <Compile Include="AssemblyTestInit.cs" />
+    <Compile Include="AuthorizeLogOnTests.cs" />
+    <Compile Include="TestSupport\AutofacBootstrapper.cs" />
     <Compile Include="BadgeCollectionTests.cs" />
     <Compile Include="BadgeTests.cs" />
     <Compile Include="EarnedBadgeCollectionTests.cs" />
@@ -123,6 +137,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Magenic.BadgeApplication.Authorization.Mock\Magenic.BadgeApplication.Authorization.Mock.csproj">
+      <Project>{d377b660-115a-4c50-84b0-672be243547d}</Project>
+      <Name>Magenic.BadgeApplication.Authorization.Mock</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Magenic.BadgeApplication.BusinessLogic\Magenic.BadgeApplication.BusinessLogic.csproj">
       <Project>{0274f325-95a1-43c8-b1d7-f81adfc0a535}</Project>
       <Name>Magenic.BadgeApplication.BusinessLogic</Name>

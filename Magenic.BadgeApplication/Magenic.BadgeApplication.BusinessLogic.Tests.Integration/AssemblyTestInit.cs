@@ -1,4 +1,4 @@
-﻿using Magenic.BadgeApplication.BusinessLogic.Framework;
+﻿using Magenic.BadgeApplication.BusinessLogic.Tests.Integration.TestSupport;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics.CodeAnalysis;
 
@@ -11,7 +11,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Tests.Integration
         [AssemblyInitialize]
         public static void AssemblyInitialize(TestContext context)
         {
-            AutofacBootstrapper.Init();
+            //AutofacBootstrapper.Init();
         }
     }
 }

@@ -3,6 +3,7 @@ using Csla;
 using Csla.Rules;
 using Csla.Rules.CommonRules;
 using Magenic.BadgeApplication.BusinessLogic.Framework;
+using Magenic.BadgeApplication.BusinessLogic.Rules;
 using Magenic.BadgeApplication.Common.DTO;
 using Magenic.BadgeApplication.Common.Enums;
 using Magenic.BadgeApplication.Common.Interfaces;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 namespace Magenic.BadgeApplication.BusinessLogic.Badge
 {
     [Serializable]
-    public sealed class BadgeEdit : BusinessBase<BadgeEdit>, IBadgeEdit
+    public sealed class BadgeEdit : BusinessBase<BadgeEdit>, IBadgeEdit, ICreateEmployee
     {
         #region Properties
 
@@ -55,14 +56,14 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
         public string ImagePath
         {
             get { return GetProperty(ImagePathProperty); }
-            private set { LoadProperty(ImagePathProperty, value); }
+            private set { SetProperty(ImagePathProperty, value); }
         }
 
         public static readonly PropertyInfo<DateTime> CreatedProperty = RegisterProperty<DateTime>(c => c.Created);
         public DateTime Created
         {
             get { return GetProperty(CreatedProperty); }
-            private set { LoadProperty(CreatedProperty, value); }
+            private set { SetProperty(CreatedProperty, value); }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
@@ -134,28 +135,34 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
         public DateTime? ApprovedDate
         {
             get { return GetProperty(ApprovedDateProperty); }
-            private set { LoadProperty(ApprovedDateProperty, value); }
+            private set { SetProperty(ApprovedDateProperty, value); }
         }
 
         public static readonly PropertyInfo<IBadgeActivityEditCollection> BadgeActivitiesProperty = RegisterProperty<IBadgeActivityEditCollection>(c => c.BadgeActivities);
         public IBadgeActivityEditCollection BadgeActivities
         {
             get { return GetProperty(BadgeActivitiesProperty); }
-            private set { LoadProperty(BadgeActivitiesProperty, value); }
+            private set { SetProperty(BadgeActivitiesProperty, value); }
         }
 
         public static readonly PropertyInfo<BadgeStatus> BadgeStatusProperty = RegisterProperty<BadgeStatus>(c => c.BadgeStatus);
         public BadgeStatus BadgeStatus
         {
             get { return GetProperty(BadgeStatusProperty); }
-            private set { LoadProperty(BadgeStatusProperty, value); }
+            private set { SetProperty(BadgeStatusProperty, value); }
+        }
+
+        public static readonly PropertyInfo<int> CreateEmployeeIdProperty = RegisterProperty<int>(c => ((ICreateEmployee)c).CreateEmployeeId);
+        int ICreateEmployee.CreateEmployeeId
+        {
+            get { return GetProperty(CreateEmployeeIdProperty); }
         }
 
         public static readonly PropertyInfo<byte[]> ImageProperty = RegisterProperty<byte[]>(c => c.Image);
         private byte[] Image
         {
             get { return GetProperty(ImageProperty); }
-            set { LoadProperty(ImageProperty, value); }
+            set { SetProperty(ImageProperty, value); }
         }
 
         #endregion Properties
@@ -201,15 +208,24 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
             this.BusinessRules.AddRule(new MaxLength(ApprovedByIdProperty, 100));
             this.BusinessRules.AddRule(new Rules.DateOrder(EffectiveStartDateProperty, EffectiveEndDateProperty));
             this.BusinessRules.AddRule(new MinValue<int>(ActivityPointsAmountProperty, 1));
+            this.BusinessRules.AddRule(new MinValue<int>(CreateEmployeeIdProperty, 1));
 
             this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.WriteProperty, ApprovedByIdProperty, PermissionType.Administrator.ToString()));
             this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.WriteProperty, ApprovedDateProperty, PermissionType.Administrator.ToString()));
-            this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.WriteProperty, ActivityPointsAmountProperty, PermissionType.Administrator.ToString()));
             this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.WriteProperty, AwardValueAmountProperty, PermissionType.Administrator.ToString()));
 
             this.BusinessRules.AddRule(new Rules.CanSetBadgeType(AuthorizationActions.WriteProperty, TypeProperty, BadgeType.Corporate, PermissionType.Administrator.ToString()));
             this.BusinessRules.AddRule(new Rules.DefaultBadgeStatus(TypeProperty, BadgeStatusProperty, ApprovedByIdProperty));
         }
+
+        public static void AddObjectAuthorizationRules()
+        {
+            BusinessRules.AddRule(typeof(IBadgeEdit), new CanChange(AuthorizationActions.DeleteObject, PermissionType.Administrator.ToString()));
+            BusinessRules.AddRule(typeof(BadgeEdit), new CanChange(AuthorizationActions.DeleteObject, PermissionType.Administrator.ToString()));
+            BusinessRules.AddRule(typeof(IBadgeEdit), new CanChange(AuthorizationActions.EditObject, PermissionType.Administrator.ToString()));
+            BusinessRules.AddRule(typeof(BadgeEdit), new CanChange(AuthorizationActions.EditObject, PermissionType.Administrator.ToString()));
+        }
+
 
         #endregion Rules
 
@@ -223,6 +239,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
             this.LoadProperty(PriorityProperty, int.MaxValue);
             this.LoadProperty(TypeProperty, BadgeType.Community);
             this.LoadProperty(BadgeActivitiesProperty, new BadgeActivityEditCollection());
+            this.SetProperty(CreateEmployeeIdProperty, ((ICustomPrincipal)ApplicationContext.User).CustomIdentity().EmployeeId);
         }
 
         private async Task DataPortal_Fetch(int badgeId)
@@ -282,7 +299,8 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
                     ApprovedById = this.ApprovedById,
                     ApprovedDate = this.ApprovedDate,
                     BadgeStatus = this.BadgeStatus,
-                    BadgeImage = this.Image
+                    BadgeImage = this.Image,
+                    CreateEmployeeId = ((ICreateEmployee)this).CreateEmployeeId
                 };
                 this.UnLoadChildren(returnValue);
                 return returnValue;
@@ -318,6 +336,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Badge
                 this.ApprovedDate = data.ApprovedDate;
                 this.BadgeStatus = data.BadgeStatus;
                 this.Image = null;
+                this.LoadProperty(CreateEmployeeIdProperty, data.CreateEmployeeId);
                 this.LoadChildren(data);
             }
         }

@@ -4,6 +4,7 @@
 @using Magenic.BadgeApplication.Models
 @using Csla.Web.Mvc
 @using Csla.Rules
+@using Csla
 @model BadgeEditViewModel
 
 <div class="row">
@@ -42,12 +43,36 @@
 
         <label>@ApplicationResources.BadgeTypeLabel</label><br />
         <label>
-            @Html.HasPermission(AuthorizationActions.WriteProperty, Model.Badge, BadgeEdit.TypeProperty, Html.RadioButtonFor(bevm => bevm.Badge.Type, BadgeType.Corporate), Html.RadioButton("NotBoundType", BadgeType.Corporate, Model.Badge.Type == BadgeType.Corporate, new { disabled = "disabled" }))
+            @* Have to do this manually because business rule only handles property, not the UI Elements. *@
+            @if (ApplicationContext.User.IsInRole(PermissionType.Administrator.ToString()))
+            {
+                <text>
+                    @Html.RadioButtonFor(bevm => bevm.Badge.Type, BadgeType.Corporate)
+                </text>
+            }
+            else
+            {
+                <text>
+                    @Html.RadioButton("NotBoundType", BadgeType.Corporate, Model.Badge.Type == BadgeType.Corporate, new { disabled = "disabled" })
+                </text>
+            }
             @ApplicationResources.BadgeCorporateLabel
         </label>
         &nbsp;&nbsp;
         <label>
-            @Html.RadioButtonFor(bevm => bevm.Badge.Type, BadgeType.Community)
+            @* Have to do this manually because business rule only handles property, not the UI Elements. *@
+            @if (ApplicationContext.User.IsInRole(PermissionType.Administrator.ToString()))
+            {
+                <text>
+                    @Html.RadioButtonFor(bevm => bevm.Badge.Type, BadgeType.Community)
+                </text>
+            }
+            else
+            {
+                <text>
+                    @Html.RadioButtonFor(bevm => bevm.Badge.Type, BadgeType.Community, new { onclick = "removeCorporateBadgeValue();" })
+                </text>
+            }
             @ApplicationResources.BadgeCommunityLabel
         </label>
         <br /><br />
@@ -55,17 +80,23 @@
             @Html.Label(ApplicationResources.RequiredActivitiesLabel)
         </div>
         <div class="editor-field">
-            @Html.ListBoxFor(bevm => bevm.SelectedActivityIds, Model.AllActivities, new { @class = "form-control selectpicker" })
+            @*@Html.ListBoxFor(bevm => bevm.SelectedActivityIds, Model.AllActivities, new { @class = "form-control selectpicker show-tick" })*@
+            @Html.DropDownListFor(bevm => bevm.SelectedActivityId, Model.AllActivities, new { @class = "form-control selectpicker show-tick" })
         </div>
     </div>
 
     <div class="col-md-5">
         <div class="editor-label">
-            @Html.LabelFor(bevm => bevm.Badge.ImagePath, ApplicationResources.BadgeNameLabel)
+            @Html.LabelFor(bevm => bevm.Badge.ImagePath, ApplicationResources.BadgeImageLabel)
         </div>
         <div class="editor-field">
             <input name="badgeImage" type="file" class="filestyle" data-classbutton="btn btn-primary" data-classinput="form-control pull-left">
             @Html.ValidationMessageFor(bevm => bevm.Badge.ImagePath)
+        </div>
+        <div class="editor-field">
+            @Html.Partial(Mvc.Shared.Views._CorporateBadgeTemplate)
+            &nbsp;|&nbsp;
+            @Html.Partial(Mvc.Shared.Views._CommunityBadgeTemplate)
         </div>
         <div class="pull-left">
             <div class="editor-label">
@@ -91,11 +122,16 @@
             @ApplicationResources.BadgeMultipleAwardsLabel
         </label>
         <br /><br />
+        <label>
+            @Html.CheckBoxFor(bevm => bevm.Badge.DisplayOnce)
+            @ApplicationResources.BadgeDisplayOnceLabel
+        </label>
+        <br /><br />
         <div class="editor-label">
             @Html.LabelFor(bevm => bevm.Badge.ActivityPointsAmount, ApplicationResources.ActivityPointsAmountLabel)
         </div>
         <div class="editor-field">
-            @Html.HasPermission(AuthorizationActions.WriteProperty, Model.Badge, BadgeEdit.ActivityPointsAmountProperty, Html.TextBoxFor(bevm => bevm.Badge.ActivityPointsAmount, new { @class = "form-control" }), Html.TextBox("NotBoundActivityPointsAmount", Model.Badge.ActivityPointsAmount, new { @class = "form-control" }))
+            @Html.HasPermission(AuthorizationActions.WriteProperty, Model.Badge, BadgeEdit.ActivityPointsAmountProperty, Html.TextBoxFor(bevm => bevm.Badge.ActivityPointsAmount, new { @class = "form-control" }), Html.TextBox("NotBoundActivityPointsAmount", Model.Badge.ActivityPointsAmount, new { @class = "form-control", disabled = "disabled" }))
             @Html.ValidationMessageFor(bevm => bevm.Badge.ActivityPointsAmount)
         </div>
         <div class="editor-label">

@@ -1,4 +1,5 @@
-﻿using Csla;
+﻿using System.Threading;
+using Csla;
 using Csla.Rules;
 using Csla.Rules.CommonRules;
 using Magenic.BadgeApplication.Common.DTO;
@@ -21,56 +22,70 @@ namespace Magenic.BadgeApplication.BusinessLogic.Activity
         public int SubmissionId
         {
             get { return GetProperty(SubmissionIdProperty); }
-            private set { LoadProperty(SubmissionIdProperty, value); }
+            private set { SetProperty(SubmissionIdProperty, value); }
         }
 
         public static readonly PropertyInfo<DateTime> SubmissionDateProperty = RegisterProperty<DateTime>(c => c.SubmissionDate);
         public DateTime SubmissionDate
         {
             get { return GetProperty(SubmissionDateProperty); }
-            private set { LoadProperty(SubmissionDateProperty, value); }
+            private set { SetProperty(SubmissionDateProperty, value); }
         }
 
         public static readonly PropertyInfo<int> ActivityIdProperty = RegisterProperty<int>(c => c.ActivityId);
         public int ActivityId
         {
             get { return GetProperty(ActivityIdProperty); }
-            private set { LoadProperty(ActivityIdProperty, value); }
+            private set { SetProperty(ActivityIdProperty, value); }
         }
 
         public static readonly PropertyInfo<string> ActivityNameProperty = RegisterProperty<string>(c => c.ActivityName);
         public string ActivityName
         {
             get { return GetProperty(ActivityNameProperty); }
-            private set { LoadProperty(ActivityNameProperty, value); }
+            private set { SetProperty(ActivityNameProperty, value); }
         }
 
         public static readonly PropertyInfo<string> ActivityDescriptionProperty = RegisterProperty<string>(c => c.ActivityDescription);
         public string ActivityDescription
         {
             get { return GetProperty(ActivityDescriptionProperty); }
-            private set { LoadProperty(ActivityDescriptionProperty, value); }
+            private set { SetProperty(ActivityDescriptionProperty, value); }
         }
 
         public static readonly PropertyInfo<string> SubmissionNotesProperty = RegisterProperty<string>(c => c.SubmissionNotes);
         public string SubmissionNotes
         {
             get { return GetProperty(SubmissionNotesProperty); }
-            private set { LoadProperty(SubmissionNotesProperty, value); }
+            private set { SetProperty(SubmissionNotesProperty, value); }
         }
 
         public static readonly PropertyInfo<int> EmployeeIdProperty = RegisterProperty<int>(c => c.EmployeeId);
         public int EmployeeId
         {
             get { return GetProperty(EmployeeIdProperty); }
-            private set { LoadProperty(EmployeeIdProperty, value); }
+            private set { SetProperty(EmployeeIdProperty, value); }
         }
 
         public static readonly PropertyInfo<string> EmployeeADNameProperty = RegisterProperty<string>(c => c.EmployeeADName);
         public string EmployeeADName
         {
             get { return GetProperty(EmployeeADNameProperty); }
-            private set { LoadProperty(EmployeeADNameProperty, value); }
+            private set { SetProperty(EmployeeADNameProperty, value); }
+        }
+
+        public static readonly PropertyInfo<string> EmployeeFirstNameProperty = RegisterProperty<string>(c => c.EmployeeFirstName);
+        public string EmployeeFirstName
+        {
+            get { return GetProperty(EmployeeFirstNameProperty); }
+            private set { SetProperty(EmployeeFirstNameProperty, value); }
+        }
+
+        public static readonly PropertyInfo<string> EmployeeLastNameProperty = RegisterProperty<string>(c => c.EmployeeLastName);
+        public string EmployeeLastName
+        {
+            get { return GetProperty(EmployeeLastNameProperty); }
+            private set { SetProperty(EmployeeLastNameProperty, value); }
         }
 
         public static readonly PropertyInfo<ActivitySubmissionStatus> StatusProperty = RegisterProperty<ActivitySubmissionStatus>(c => c.Status);
@@ -84,7 +99,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Activity
         public int ApprovedById
         {
             get { return GetProperty(ApprovedByIdProperty); }
-            private set { LoadProperty(ApprovedByIdProperty, value); }
+            private set { SetProperty(ApprovedByIdProperty, value); }
         }
 
         #endregion Properties
@@ -140,6 +155,8 @@ namespace Magenic.BadgeApplication.BusinessLogic.Activity
                 this.SubmissionNotes = item.SubmissionNotes;
                 this.EmployeeId = item.EmployeeId;
                 this.EmployeeADName = item.EmployeeADName;
+                this.EmployeeFirstName = item.EmployeeFirstName;
+                this.EmployeeLastName = item.EmployeeLastName;
                 this.Status = item.Status;
                 this.ApprovedById = item.ApprovedById;
             }
@@ -162,6 +179,8 @@ namespace Magenic.BadgeApplication.BusinessLogic.Activity
                     SubmissionNotes = this.SubmissionNotes,
                     EmployeeId = this.EmployeeId,
                     EmployeeADName = this.EmployeeADName,
+                    EmployeeFirstName = this.EmployeeFirstName,
+                    EmployeeLastName = this.EmployeeFirstName,
                     Status = this.Status,
                     ApprovedById = this.ApprovedById,
                 };
@@ -177,6 +196,7 @@ namespace Magenic.BadgeApplication.BusinessLogic.Activity
         {
             base.AddBusinessRules();
 
+            this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.GetObject, PermissionType.Manager.ToString()));
             this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.ExecuteMethod, ApproveActivitySubmissionMethod, PermissionType.Manager.ToString()));
             this.BusinessRules.AddRule(new IsInRole(AuthorizationActions.ExecuteMethod, DenyActivitySubmissionMethod, PermissionType.Manager.ToString()));
         }

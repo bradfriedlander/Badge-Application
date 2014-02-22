@@ -13,9 +13,23 @@
                     <h2>@ApplicationResources.CommunityBadgesForApprovalHeader</h2>
                 </div>
             </div>
+            <div class="row">
+                <div id="AdminActivitiesForm" class="col-md-10 darkGrayHeaderList">
+                    @Html.Hidden("UrlToList", Url.Action(Mvc.BadgeManager.ApproveCommunityBadgesList()))
+                    @Html.Hidden("UrlToApprove", Url.Action(Mvc.BadgeManager.ApproveBadgeSubmission()))
+                    @Html.Hidden("UrlToReject", Url.Action(Mvc.BadgeManager.RejectBadgeSubmission()))
+                    <div id="badgesForApproval">
+                        @Html.Partial(Mvc.BadgeManager.Views._BadgesForApproval, Model.BadgesToApprove)
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
         &nbsp;
     </div>
 </div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/badgeManager")
+}

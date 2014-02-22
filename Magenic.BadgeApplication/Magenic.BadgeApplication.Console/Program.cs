@@ -1,8 +1,5 @@
-﻿using Autofac;
-using Magenic.BadgeApplication.BusinessLogic.Framework;
+﻿using System.ServiceProcess;
 using Magenic.BadgeApplication.Common;
-using Magenic.BadgeApplication.Common.Interfaces;
-using Magenic.BadgeApplication.Processor;
 using System;
 
 namespace Magenic.BadgeApplication.Console
@@ -11,16 +8,17 @@ namespace Magenic.BadgeApplication.Console
     {
         static void Main(string[] args)
         {
-            try
+            if (args.Length == 0)
             {
-                AutofacBootstrapper.Init();
-
-                QueueProcessor processor = new QueueProcessor();
-                processor.Start();             
+                var servicesToRun = new ServiceBase[]
+                {
+                    new QueueProcessor()
+                };
+                ServiceBase.Run(servicesToRun);
             }
-            catch (Exception ex)
+            else
             {
-                Logger.Fatal<Program>(ex.Message, ex);
+                Starter.Start();
             }
         }
     }
